@@ -1,7 +1,6 @@
-import * as dotenv from 'dotenv'
 import Fastify, { FastifyInstance } from 'fastify'
 
-dotenv.config()
+import { createSchema } from './db'
 
 const server: FastifyInstance = Fastify({ logger: true })
 
@@ -12,6 +11,10 @@ server.get('/', async () => {
 // Start the server.
 const start = async () => {
   try {
+    server.log.info('migrating database')
+    await createSchema()
+    server.log.info('database initialized')
+
     const port = Number(process.env.PORT || 4000)
 
     await server.listen({ port, host: '0.0.0.0' })
