@@ -19,13 +19,19 @@ Model.knex(knex)
  * MODELS
  */
 
-export class Multisigs extends Model {
+export class Nonce extends Model {
+  static get tableName(): string {
+    return 'nonces'
+  }
+}
+
+export class Multisig extends Model {
   static get tableName(): string {
     return 'multisigs'
   }
 }
 
-export class Proposals extends Model {
+export class Proposal extends Model {
   static get tableName(): string {
     return 'proposals'
   }
@@ -34,7 +40,7 @@ export class Proposals extends Model {
     return {
       children: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Multisigs,
+        modelClass: Multisig,
         join: {
           from: 'proposals.multisigId',
           to: 'multisigs.id',
@@ -53,7 +59,7 @@ export class Signatures extends Model {
     return {
       children: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Proposals,
+        modelClass: Proposal,
         join: {
           from: 'signatures.proposalId',
           to: 'proposals.id',
@@ -65,6 +71,16 @@ export class Signatures extends Model {
 
 // TODO: Move this to knex migrations.
 export async function createSchema() {
+  if (!(await knex.schema.hasTable('nonces'))) {
+    await knex.schema.createTable('nonces', (table) => {
+      table.increments('id').primary()
+      table.string('address')
+      table.boolean('used').defaultTo(false)
+      table.string('message')
+      table.string('value')
+    })
+  }
+
   if (!(await knex.schema.hasTable('multisigs'))) {
     await knex.schema.createTable('multisigs', (table) => {
       table.increments('id').primary()
@@ -78,6 +94,7 @@ export async function createSchema() {
       table.increments('id').primary()
       table.integer('start_block')
       table.integer('deadline')
+      table.string('title')
       table.string('text')
       table.timestamps(true, true, true)
       table.integer('multisig_id').references('multisigs.id')

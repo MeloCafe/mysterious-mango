@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "alchemy-sdk": "^2.2.0",
+    "dayjs": "^1.11.6",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "fastify": "^4.9.2",
     "got": "11",
+    "jsonwebtoken": "^8.5.1",
     "knex": "^2.3.0",
     "objection": "^3.0.1",
     "pg": "^8.8.0",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "^1.0.1",
+    "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^18.11.4",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
