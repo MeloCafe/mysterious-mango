@@ -35,6 +35,7 @@ const start = async () => {
 
     const port = Number(process.env.PORT || 4000)
 
+    await server.register(require('@fastify/cors'), { origin: '*' })
     await server.listen({ port, host: '0.0.0.0' })
   } catch (err) {
     server.log.error(err)
