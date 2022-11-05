@@ -6,7 +6,10 @@ dotenv.config()
 
 const knex = Knex({
   client: 'pg',
-  connection: process.env.DB_CONNECTION,
+  connection: {
+    connectionString: process.env.DB_CONNECTION,
+    ssl: process.env.NODE_ENV !== 'development',
+  },
 })
 
 Model.knex(knex)
