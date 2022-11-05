@@ -1,11 +1,29 @@
 import Fastify, { FastifyInstance } from 'fastify'
 
 import { createSchema } from './db'
+import { logger } from './logger'
+import { getCollection } from './nfts'
 
-const server: FastifyInstance = Fastify({ logger: true })
+const server: FastifyInstance = Fastify({ logger })
 
 server.get('/', async () => {
   return { message: 'lfg' }
+})
+
+server.get('/collection', async (req, reply) => {
+  const address = (req.query as any).address
+  if (!address) {
+    reply.code(400).send({ error: 'missing address' })
+    return
+  }
+
+  const collection = await getCollection(address)
+  if (!collection) {
+    reply.code(500).send({ error: 'collection fetch failed' })
+    return
+  }
+
+  reply.send({ collection })
 })
 
 // Start the server.

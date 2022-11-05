@@ -11,12 +11,16 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "alchemy-sdk": "^2.2.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "fastify": "^4.9.2",
+    "got": "11",
     "knex": "^2.3.0",
     "objection": "^3.0.1",
-    "pg": "^8.8.0"
+    "pg": "^8.8.0",
+    "pino": "^8.7.0",
+    "pino-pretty": "^9.1.1"
   },
   "devDependencies": {
     "@tsconfig/node18": "^1.0.1",
