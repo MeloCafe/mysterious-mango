@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import Knex from 'knex'
-import { Model } from 'objection'
+import { knexSnakeCaseMappers, Model } from 'objection'
 
 dotenv.config()
 
@@ -10,6 +10,7 @@ const knex = Knex({
     connectionString: process.env.DB_CONNECTION,
     ssl: process.env.NODE_ENV !== 'development',
   },
+  ...knexSnakeCaseMappers(),
 })
 
 Model.knex(knex)
@@ -75,11 +76,11 @@ export async function createSchema() {
   if (!(await knex.schema.hasTable('proposals'))) {
     await knex.schema.createTable('proposals', (table) => {
       table.increments('id').primary()
-      table.integer('startBlock')
+      table.integer('start_block')
       table.integer('deadline')
       table.string('text')
       table.timestamps(true, true, true)
-      table.integer('multisigId').references('multisigs.id')
+      table.integer('multisig_id').references('multisigs.id')
     })
   }
 
@@ -89,7 +90,7 @@ export async function createSchema() {
       table.string('address')
       table.string('data')
       table.timestamps(true, true, true)
-      table.integer('proposalId').references('proposals.id')
+      table.integer('proposal_id').references('proposals.id')
     })
   }
 }
