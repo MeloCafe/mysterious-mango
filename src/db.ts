@@ -68,6 +68,7 @@ export async function createSchema() {
   if (!(await knex.schema.hasTable('multisigs'))) {
     await knex.schema.createTable('multisigs', (table) => {
       table.increments('id').primary()
+      table.string('address').unique()
       table.string('collection')
       table.timestamps(true, true, true)
     })
@@ -76,9 +77,11 @@ export async function createSchema() {
   if (!(await knex.schema.hasTable('proposals'))) {
     await knex.schema.createTable('proposals', (table) => {
       table.increments('id').primary()
+      table.string('prop_id').notNullable()
       table.integer('start_block')
       table.integer('deadline')
-      table.string('text')
+      table.string('title')
+      table.string('description')
       table.timestamps(true, true, true)
       table.integer('multisig_id').references('multisigs.id')
     })

@@ -13,6 +13,7 @@ import { resolve } from 'path'
 import { createSchema } from './db'
 import { logger } from './logger'
 import { getCollection } from './nfts'
+import { getVoteCount, recordSignature } from './operations'
 
 const server: FastifyInstance = Fastify({ logger })
 
@@ -38,6 +39,29 @@ server.get('/collection', async (req, reply) => {
   }
 
   reply.send({ collection })
+})
+
+type VoteRequestBody = {
+  address: string
+  proposal: string // prop ID
+  signature: string
+  vault: string // vault address
+}
+
+server.post('/vote', async (req, reply) => {
+  const { address, proposal, signature, vault } = req.body as VoteRequestBody
+  if (!address || !proposal || !signature || !vault) {
+    reply.code(400).send({ error: 'incomplete vote' })
+    return
+  }
+
+  const { proposalId } = await recordSignature(address, signature, vault, proposal)
+  req.log.info({ address, proposal, vault }, 'Recorded new vote')
+
+  const count = await getVoteCount(proposalId)
+  req.log.info({ count }, 'Fetched votes')
+
+  reply.send({ votes: count })
 })
 
 let acir: any
