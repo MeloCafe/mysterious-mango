@@ -37,24 +37,23 @@ server.get('/collection', async (req, reply) => {
   reply.send({ collection })
 })
 
-function path_to_uint8array(path: string) {
+let acir: any
+async function getAcir() {
+  if (acir) return acir
+  const path = resolve(__dirname, './circuit.acir')
   const buffer = readFileSync(path)
-  return new Uint8Array(buffer)
+  const acirByteArray = new Uint8Array(buffer)
+  acir = acir_from_bytes(acirByteArray)
+  return acir
 }
 
 async function getProver() {
-  const path = resolve(__dirname, './circuit.acir')
-  console.log('path of the circuit', path)
-  const acirByteArray = path_to_uint8array(path)
-  const acir = acir_from_bytes(acirByteArray)
-  console.log('circuit', acir)
+  const acir = getAcir()
 
   return setup_generic_prover_and_verifier(acir)
 }
 
 server.get('/proof/governor/:governor/proposal/:proposal_id', async (req, reply) => {
-  console.info('getting the prover')
-
   let prover: StandardExampleProver
   let verifier: StandardExampleVerifier
   try {
@@ -64,22 +63,16 @@ server.get('/proof/governor/:governor/proposal/:proposal_id', async (req, reply)
     return
   }
 
-  console.log('got the prover', prover)
-
-  const { governor, proposal_id } = req.params as any
-
-  console.info({ params: req.params })
+  const { governor, proposal_id } = req.params as { governor: string; proposal_id: string }
 
   const program_input = {
     governor,
     proposal_id,
-    votes: [1, 2],
 
     return: [governor, proposal_id],
   }
 
-  const acirByteArray = path_to_uint8array(resolve(__dirname, './circuit.acir'))
-  const acir = acir_from_bytes(acirByteArray)
+  const acir = getAcir()
 
   try {
     const proof: Buffer = await create_proof(prover, acir, program_input)
