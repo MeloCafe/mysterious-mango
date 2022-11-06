@@ -4,14 +4,14 @@
 
 import got from 'got'
 
-import { ALCHEMY_NFT_API_URL } from './alchemy'
+import { getAPIUrl } from './alchemy'
 import { logger } from './logger'
 import { NFTCollection, NFTTokenType } from './types'
 
-export const getCollection = async (address: string): Promise<NFTCollection | undefined> => {
+export const getCollection = async (address: string, networkId: number): Promise<NFTCollection | undefined> => {
   try {
     const params = new URLSearchParams({ contractAddress: address })
-    const url = `${ALCHEMY_NFT_API_URL}/getContractMetadata?${params.toString()}`
+    const url = `${getAPIUrl(networkId)}/getContractMetadata?${params.toString()}`
     const data = (await got.get(url).json()) as any
 
     logger.info({ collection: data }, 'Fetched collection')

@@ -1,19 +1,18 @@
-import Fastify, { FastifyInstance } from 'fastify'
-
-import { createSchema } from './db'
-import { logger } from './logger'
-import { getCollection } from './nfts'
-
 import {
-  setup_generic_prover_and_verifier,
   create_proof,
+  setup_generic_prover_and_verifier,
   StandardExampleProver,
   StandardExampleVerifier,
   verify_proof,
 } from '@noir-lang/barretenberg/dest/client_proofs'
+import { acir_from_bytes } from '@noir-lang/noir_wasm'
+import Fastify, { FastifyInstance } from 'fastify'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import { acir_from_bytes } from '@noir-lang/noir_wasm'
+
+import { createSchema } from './db'
+import { logger } from './logger'
+import { getCollection } from './nfts'
 
 const server: FastifyInstance = Fastify({ logger })
 
@@ -21,14 +20,18 @@ server.get('/', async () => {
   return { message: 'lfg' }
 })
 
+type CollectionQueryParams = { address: string; chainId: string }
+
 server.get('/collection', async (req, reply) => {
-  const address = (req.query as any).address
+  const { address, chainId } = req.query as CollectionQueryParams
   if (!address) {
     reply.code(400).send({ error: 'missing address' })
     return
   }
 
-  const collection = await getCollection(address)
+  // Default to mainnet.
+  const networkId = chainId ? Number(chainId) : 1
+  const collection = await getCollection(address, networkId)
   if (!collection) {
     reply.code(500).send({ error: 'collection fetch failed' })
     return
@@ -98,6 +101,7 @@ const start = async () => {
 
     const port = Number(process.env.PORT || 4000)
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     await server.register(require('@fastify/cors'), { origin: '*' })
     await server.listen({ port, host: '0.0.0.0' })
   } catch (err) {

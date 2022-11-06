@@ -13,6 +13,18 @@ const settings = {
   network: Network.ETH_MAINNET,
 }
 
-export const ALCHEMY_NFT_API_URL = `https://eth-mainnet.g.alchemy.com/nft/v2/${ALCHEMY_KEY}`
+export const ALCHEMY_NFT_API_URL_MAINNET = `https://eth-mainnet.g.alchemy.com/nft/v2/${ALCHEMY_KEY}`
+export const ALCHEMY_NFT_API_URL_GOERLI = `https://eth-goerli.g.alchemy.com/nft/v2/${ALCHEMY_KEY}`
 
 export const alchemy = new Alchemy(settings)
+
+export function getAPIUrl(networkId: number) {
+  // TODO: Support more.
+  switch (networkId) {
+    case 5:
+      return ALCHEMY_NFT_API_URL_GOERLI
+    case 1:
+    default:
+      return ALCHEMY_NFT_API_URL_MAINNET
+  }
+}
