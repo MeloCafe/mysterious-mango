@@ -52,7 +52,7 @@ async function getProver() {
   return setup_generic_prover_and_verifier(acir)
 }
 
-server.get('/proof/governor/:governor/proposal/:proposal_id/block_hash/:block_hash', async (req, reply) => {
+server.get('/proof/governor/:governor/proposal/:proposal_id', async (req, reply) => {
   console.info('getting the prover')
 
   let prover: StandardExampleProver
@@ -66,18 +66,14 @@ server.get('/proof/governor/:governor/proposal/:proposal_id/block_hash/:block_ha
 
   console.log('got the prover', prover)
 
-  console.info({ params: req.params })
+  const { governor, proposal_id } = req.params as any
 
-  const { governor, proposal_id, block_hash } = req.params as any
+  console.info({ params: req.params })
 
   const program_input = {
     governor,
     proposal_id,
     votes: [1, 2],
-    _block_hash: block_hash,
-    _signatures: [0],
-    _accountProofs: [0],
-    _storageProofs: [0],
 
     return: [governor, proposal_id],
   }
