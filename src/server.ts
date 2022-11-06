@@ -38,7 +38,7 @@ server.get('/collection', async (req, reply) => {
 })
 
 let acir: any
-async function getAcir() {
+function getAcir() {
   if (acir) return acir
   const path = resolve(__dirname, './circuit.acir')
   const buffer = readFileSync(path)
