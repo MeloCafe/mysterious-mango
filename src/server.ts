@@ -21,6 +21,24 @@ server.get('/', async () => {
   return { message: 'lfg' }
 })
 
+server.get('/strawberry/:tokenId', async (req, reply) => {
+  const { tokenId } = req.params as any
+
+  if (isNaN(parseInt(tokenId)) || Number(tokenId) > 4) {
+    reply.code(404).send({ error: 'invalid token' })
+    return
+  }
+
+  const payload = {
+    name: `melo cafe #${tokenId}`,
+    description: 'A test collection from melo.cafe',
+    image: `https://storage.googleapis.com/suspicious-strawbs/${tokenId}.png`,
+    attributes: [],
+  }
+
+  reply.send({ ...payload })
+})
+
 type CollectionQueryParams = { address: string; chainId: string }
 
 server.get('/collection', async (req, reply) => {
