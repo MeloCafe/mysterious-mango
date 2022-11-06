@@ -8,6 +8,8 @@ import {
   setup_generic_prover_and_verifier,
   create_proof,
   StandardExampleProver,
+  StandardExampleVerifier,
+  verify_proof,
 } from '@noir-lang/barretenberg/dest/client_proofs'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
@@ -54,8 +56,9 @@ server.get('/proof/governor/:governor/proposal/:proposal_id/block_hash/:block_ha
   console.info('getting the prover')
 
   let prover: StandardExampleProver
+  let verifier: StandardExampleVerifier
   try {
-    ;[prover] = await getProver()
+    ;[prover, verifier] = await getProver()
   } catch (error) {
     console.error('Failed to get circuit', error)
     return
@@ -67,7 +70,7 @@ server.get('/proof/governor/:governor/proposal/:proposal_id/block_hash/:block_ha
 
   const { governor, proposal_id, block_hash } = req.params as any
 
-  const abi = {
+  const program_input = {
     governor,
     proposal_id,
     votes: [1, 2],
@@ -83,8 +86,15 @@ server.get('/proof/governor/:governor/proposal/:proposal_id/block_hash/:block_ha
   const acir = acir_from_bytes(acirByteArray)
 
   try {
-    const proof: Buffer = await create_proof(prover, acir, abi)
-    reply.send({ proof: proof.toString('hex') })
+    const proof: Buffer = await create_proof(prover, acir, program_input)
+
+    const verified = await verify_proof(verifier, proof)
+    if (!verified) {
+      reply.statusCode = 400
+      reply.send({ error: 'invalid proof' })
+    } else {
+      reply.send({ proof: proof.toString('hex') })
+    }
   } catch (error) {
     console.error({ error }, 'failed to generate proof')
   }
