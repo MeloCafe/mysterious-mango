@@ -14,6 +14,7 @@ const settings = {
 }
 
 export const ALCHEMY_NFT_API_URL_MAINNET = `https://eth-mainnet.g.alchemy.com/nft/v2/${ALCHEMY_KEY}`
+export const ALCHEMY_NFT_API_URL_MUMBAI = `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}`
 export const ALCHEMY_NFT_API_URL_GOERLI = `https://eth-goerli.g.alchemy.com/nft/v2/${ALCHEMY_KEY}`
 
 export const alchemy = new Alchemy(settings)
@@ -21,6 +22,8 @@ export const alchemy = new Alchemy(settings)
 export function getAPIUrl(networkId: number) {
   // TODO: Support more.
   switch (networkId) {
+    case 80001:
+      return ALCHEMY_NFT_API_URL_MUMBAI
     case 5:
       return ALCHEMY_NFT_API_URL_GOERLI
     case 1:
