@@ -10,7 +10,7 @@ import Fastify, { FastifyInstance } from 'fastify'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
-import { createSchema } from './db'
+import { createSchema, Multisigs, Proposals, Signatures } from './db'
 import { logger } from './logger'
 import { getCollection } from './nfts'
 import { getVoteCount, recordSignature } from './operations'
@@ -61,6 +61,31 @@ server.post('/vote', async (req, reply) => {
   const count = await getVoteCount(proposalId)
   req.log.info({ count }, 'Fetched votes')
 
+  reply.send({ votes: count })
+})
+
+type VotesQuery = { proposal: string; vault: string }
+
+server.get('/votes', async (req, reply) => {
+  const { proposal, vault } = req.query as VotesQuery
+  if (!proposal || !vault) {
+    reply.code(400).send({ error: 'missing proposal or vault' })
+    return
+  }
+
+  const multisig: any = await Multisigs.query().where('address', vault).first()
+  if (!multisig) {
+    reply.code(404).send({ error: 'no vault found' })
+    return
+  }
+
+  const prop: any = await Proposals.query().where('multisigId', multisig.id).where('propId', proposal).first()
+  if (!prop) {
+    reply.code(404).send({ error: 'no proposal found' })
+    return
+  }
+
+  const count = await Signatures.query().where('proposalId', prop.id).resultSize()
   reply.send({ votes: count })
 })
 
