@@ -10,7 +10,7 @@ export async function recordSignature(address: string, data: string, vault: stri
   }
 
   // Try and get proposal, create if none.
-  let prop: any = await Proposals.query().where('multisigId', multisig.id).where('propId', proposal)
+  let prop: any = await Proposals.query().where('multisigId', multisig.id).where('propId', proposal).first()
   if (!prop) {
     prop = await Proposals.query()
       .insert({
@@ -21,7 +21,7 @@ export async function recordSignature(address: string, data: string, vault: stri
   }
 
   // See if this address has signed this proposal.
-  let sig: any = await Signatures.query().where('address', address).where('proposalId', prop.id)
+  let sig: any = await Signatures.query().where('address', address).where('proposalId', prop.id).first()
   if (sig) {
     throw new Error('already signed')
   }
@@ -42,5 +42,6 @@ export async function recordSignature(address: string, data: string, vault: stri
 }
 
 export async function getVoteCount(proposalId: number): Promise<number> {
-  return Signatures.query().where('proposalId', proposalId).count({ count: '*' }).count as unknown as number
+  const query = Signatures.query().where('proposalId', proposalId)
+  return query.resultSize()
 }
