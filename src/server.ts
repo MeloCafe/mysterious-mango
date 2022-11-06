@@ -4,6 +4,15 @@ import { createSchema } from './db'
 import { logger } from './logger'
 import { getCollection } from './nfts'
 
+import {
+  setup_generic_prover_and_verifier,
+  create_proof,
+  StandardExampleProver,
+} from '@noir-lang/barretenberg/dest/client_proofs'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+import { acir_from_bytes } from '@noir-lang/noir_wasm'
+
 const server: FastifyInstance = Fastify({ logger })
 
 server.get('/', async () => {
@@ -24,6 +33,61 @@ server.get('/collection', async (req, reply) => {
   }
 
   reply.send({ collection })
+})
+
+function path_to_uint8array(path: string) {
+  const buffer = readFileSync(path)
+  return new Uint8Array(buffer)
+}
+
+async function getProver() {
+  const path = resolve(__dirname, './circuit.acir')
+  console.log('path of the circuit', path)
+  const acirByteArray = path_to_uint8array(path)
+  const acir = acir_from_bytes(acirByteArray)
+  console.log('circuit', acir)
+
+  return setup_generic_prover_and_verifier(acir)
+}
+
+server.get('/proof/governor/:governor/proposal/:proposal_id/block_hash/:block_hash', async (req, reply) => {
+  console.info('getting the prover')
+
+  let prover: StandardExampleProver
+  try {
+    ;[prover] = await getProver()
+  } catch (error) {
+    console.error('Failed to get circuit', error)
+    return
+  }
+
+  console.log('got the prover', prover)
+
+  console.info({ params: req.params })
+
+  const { governor, proposal_id, block_hash } = req.params as any
+
+  const abi = {
+    governor,
+    proposal_id,
+    votes: [1, 2],
+    _block_hash: block_hash,
+    _signatures: [0],
+    _accountProofs: [0],
+    _storageProofs: [0],
+
+    return: [governor, proposal_id],
+  }
+
+  const acirByteArray = path_to_uint8array(resolve(__dirname, './circuit.acir'))
+  const acir = acir_from_bytes(acirByteArray)
+
+  try {
+    const proof: Buffer = await create_proof(prover, acir, abi)
+    reply.send({ proof: proof.toString('hex') })
+  } catch (error) {
+    console.error({ error }, 'failed to generate proof')
+  }
 })
 
 // Start the server.

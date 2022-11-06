@@ -8,7 +8,7 @@ const knex = Knex({
   client: 'pg',
   connection: {
     connectionString: process.env.DB_CONNECTION,
-    ssl: process.env.NODE_ENV !== 'development',
+    ssl: true || process.env.NODE_ENV !== 'development ',
   },
   ...knexSnakeCaseMappers(),
 })

@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.1.1",
+    "@noir-lang/barretenberg": "^2.19.0",
+    "@noir-lang/noir_wasm": "^0.10.0",
     "alchemy-sdk": "^2.2.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
