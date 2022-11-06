@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
-    "build": "tsc",
+    "build": "tsc && cp src/circuit.acir build/circuit.acir",
     "lint": "eslint src --ext js,ts",
     "start": "node build/server.js",
     "prepare": "husky install"
