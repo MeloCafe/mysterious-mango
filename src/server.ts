@@ -12,7 +12,6 @@ import {
   verify_proof,
 } from '@noir-lang/barretenberg/dest/client_proofs'
 import { readFileSync } from 'fs'
-import { resolve } from 'path'
 import { acir_from_bytes } from '@noir-lang/noir_wasm'
 
 const server: FastifyInstance = Fastify({ logger })
@@ -43,8 +42,7 @@ function path_to_uint8array(path: string) {
 }
 
 async function getProver() {
-  const path = resolve(__dirname, './circuit.acir')
-  console.log('path of the circuit', path)
+  const path = './circuit.acir'
   const acirByteArray = path_to_uint8array(path)
   const acir = acir_from_bytes(acirByteArray)
   console.log('circuit', acir)
@@ -78,7 +76,7 @@ server.get('/proof/governor/:governor/proposal/:proposal_id', async (req, reply)
     return: [governor, proposal_id],
   }
 
-  const acirByteArray = path_to_uint8array(resolve(__dirname, './circuit.acir'))
+  const acirByteArray = path_to_uint8array('./circuit.acir')
   const acir = acir_from_bytes(acirByteArray)
 
   try {
